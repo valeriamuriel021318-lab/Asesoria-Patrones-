@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sucesiones, Patrones y Cíclicas · Asesoría Carol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Baloo+Thambi+2:wght@400;500;600;700&family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --frame-bg:#E9EAF0; --frame-ink:#3B2F42; --bar-bg:#ffffff; --bar-line:#D9DBE5;
+  --paper:#F8F8F6; --rule:#E7E9EF; --margin:#F2A7CF;
+  --purple:#6B3B8C; --slate:#4E5A9C; --ink:#3B2F42; --soft:#6E6577;
+  --teal:#5BD0C6; --pink:#F06AB8; --yellow:#F3DF7F; --blue:#5DA9EC; --navy:#3E4A8C;
+  --green:#22B58A; --red:#E5487A; --outline:#2B2340;
+  --fh:"Fredoka","Baloo Thambi 2","Trebuchet MS",system-ui,sans-serif;
+  --fs:"Fredoka","Baloo Thambi 2","Trebuchet MS",system-ui,sans-serif;
+  --fb:"Baloo Thambi 2","Baloo 2","Trebuchet MS",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--frame-bg:#1C1A24;--frame-ink:#ECE8F2;--bar-bg:#26232F;--bar-line:#3A3646;}
+}
+:root[data-theme="dark"]{--frame-bg:#1C1A24;--frame-ink:#ECE8F2;--bar-bg:#26232F;--bar-line:#3A3646;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;height:100%;-webkit-font-smoothing:antialiased;background:var(--frame-bg);color:var(--frame-ink);font-family:var(--fb);display:flex;flex-direction:column;overflow:hidden}
+#viewport{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+#frame{width:calc(1280px * var(--s,1));height:calc(720px * var(--s,1));position:relative;border-radius:calc(14px * var(--s,1));overflow:hidden;box-shadow:0 10px 40px rgba(40,30,70,.18)}
+#stage{width:1280px;height:720px;transform:scale(var(--s,1));transform-origin:0 0;position:absolute;left:0;top:0}
+
+/* slide base */
+.slide{position:absolute;inset:0;display:none;overflow:hidden;color:var(--ink);
+  background:
+   linear-gradient(90deg,transparent 78px,var(--margin) 78px,var(--margin) 80px,transparent 80px),
+   repeating-linear-gradient(180deg,transparent 0 43px,var(--rule) 43px 45px),
+   var(--paper);}
+.slide.active{display:block}
+.slide.active .pop{animation:pop .5s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes pop{from{opacity:0;transform:scale(.85) rotate(-3deg)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide.active .pop{animation:none}}
+.inner{position:absolute;inset:75px 65px 35px 110px}
+.deco{position:absolute;pointer-events:none;overflow:visible}
+.num{position:absolute;font-family:var(--fh);font-weight:700;line-height:1;color:var(--c,var(--yellow));
+  -webkit-text-stroke:3px var(--outline);paint-order:stroke fill;text-shadow:5px 5px 0 rgba(43,35,64,.12);transform:rotate(var(--r,0deg));pointer-events:none}
+
+/* pill de encabezado sin solapamiento */
+.pill{position:absolute;top:22px;right:45px;background:var(--yellow);border:2.5px solid var(--outline);border-radius:30px;padding:4px 16px;font-family:var(--fb);font-weight:600;font-size:18px;color:var(--outline);display:flex;gap:8px;align-items:center;z-index:10;box-shadow:3px 3px 0 rgba(43,35,64,.12)}
+.pill svg{width:18px;height:18px;flex:none}
+
+h1,h2,h3{margin:0;font-weight:600}
+.h-hero{font-family:var(--fh);color:var(--purple);font-size:84px;line-height:1.02;font-weight:600;letter-spacing:-.5px}
+.h-sub{font-family:var(--fs);color:var(--slate);font-weight:500;font-size:52px;line-height:1.1}
+.h-title{font-family:var(--fs);color:var(--slate);font-weight:500;letter-spacing:-.3px;font-size:44px;line-height:1.1}
+.h-purple{font-family:var(--fh);color:var(--purple);font-weight:600}
+.lead{font-family:var(--fb);font-size:23px;line-height:1.35;font-weight:500;color:var(--ink)}
+.small{font-size:18px;line-height:1.4;color:var(--soft)}
+.center{text-align:center}
+.row{display:flex;gap:24px}
+.col{display:flex;flex-direction:column;gap:12px}
+
+/* card */
+.card{background:#fff;border:2.5px solid var(--outline);border-radius:18px;padding:20px 24px;position:relative;box-shadow:6px 6px 0 rgba(43,35,64,.10)}
+.card.tape::before{content:"";position:absolute;top:-14px;left:50%;width:110px;height:26px;transform:translateX(-50%) rotate(-3deg);background:rgba(243,223,127,.85);border:1.5px solid rgba(43,35,64,.25)}
+.card .src{font-size:15px;color:var(--soft);font-weight:600;margin-bottom:6px;display:flex;gap:8px;align-items:center}
+.tag{display:inline-block;border-radius:20px;padding:1px 12px;font-size:14px;font-weight:700;border:2px solid var(--outline)}
+.tag.real{background:var(--teal)}
+.tag.prac{background:#FCD9EC}
+.problem{font-size:22px;line-height:1.42}
+.problem .st{display:block;padding-left:14px;margin-top:4px}
+
+/* options */
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opts.one{grid-template-columns:1fr}
+.opt{font:inherit;font-size:20px;text-align:left;display:flex;align-items:center;gap:12px;background:#fff;border:2.5px solid var(--outline);border-radius:14px;padding:8px 14px;cursor:pointer;color:var(--ink);line-height:1.25;transition:transform .12s,background .2s}
+.opt b{flex:none;width:36px;height:36px;border-radius:50%;background:var(--yellow);display:grid;place-items:center;font-family:var(--fh);font-size:18px;color:var(--pink);border:2px solid var(--outline)}
+.opt:hover{transform:translateY(-2px)}
+.opt.correct{background:#C9F2E3;border-color:var(--green)}
+.opt.correct b{background:var(--green);color:#fff}
+.opt.wrong{background:#FDE0EA;animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.btn{white-space:nowrap;font:inherit;font-weight:600;font-size:18px;border:2.5px solid var(--outline);border-radius:30px;padding:6px 18px;background:var(--teal);color:var(--outline);cursor:pointer;box-shadow:3px 3px 0 var(--outline)}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--outline)}
+.btn.pink{background:var(--pink);color:#fff}
+.btn.yellow{background:var(--yellow)}
+.btn.ghost{background:#fff}
+.btn[disabled]{opacity:.55;cursor:default}
+
+.step{opacity:0;transform:translateY(10px);transition:opacity .35s,transform .35s;visibility:hidden}
+.step.on{opacity:1;transform:none;visibility:visible}
+
+/* timer */
+.timer{display:flex;align-items:center;gap:10px;background:#fff;border:2.5px solid var(--outline);border-radius:40px;padding:4px 8px 4px 16px;width:max-content}
+.timer .t{font-family:var(--fh);font-size:30px;font-weight:600;color:var(--purple);min-width:100px;font-variant-numeric:tabular-nums}
+.timer .lbl{font-size:15px;color:var(--soft);font-weight:600}
+.timer.danger .t{color:var(--red)}
+
+.secnum{flex:none;width:130px;height:130px;border-radius:50%;background:var(--yellow);border:3px solid var(--outline);display:grid;place-items:center;font-family:var(--fh);font-size:64px;color:var(--pink);font-weight:600}
+
+.math{font-family:var(--fh);color:var(--purple);font-weight:500}
+.hl{background:linear-gradient(transparent 55%,rgba(243,223,127,.9) 55%);padding:0 3px}
+.ok{color:var(--green);font-weight:700}
+.no{color:var(--red);font-weight:700}
+table.t{border-collapse:separate;border-spacing:0;width:100%;font-size:19px;background:#fff;border:2.5px solid var(--outline);border-radius:16px;overflow:hidden}
+table.t th,table.t td{padding:8px 12px;text-align:left;border-bottom:2px solid #ECEAF2}
+table.t tr:last-child td{border-bottom:0}
+table.t th{background:var(--slate);color:#fff;font-family:var(--fs);font-weight:600;font-size:18px}
+.notebox{border-left:6px solid var(--pink);background:#fff;border-radius:0 14px 14px 0;padding:10px 16px;font-size:19px;line-height:1.4;border-top:1.5px solid var(--outline);border-right:1.5px solid var(--outline);border-bottom:1.5px solid var(--outline)}
+
+/* Tabla para Ejercicio 12 (Matriz 3x3) */
+.grid-matrix {
+  border-collapse: separate;
+  border-spacing: 8px;
+  margin: 12px auto 4px;
+}
+.grid-matrix td {
+  width: 70px;
+  height: 52px;
+  background: #F8F6FD;
+  border: 2.5px solid var(--outline);
+  border-radius: 12px;
+  text-align: center;
+  vertical-align: middle;
+  font-family: var(--fh);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--purple);
+  box-shadow: 3px 3px 0 rgba(43,35,64,.08);
+}
+.grid-matrix td.target {
+  background: var(--yellow);
+  color: var(--pink);
+  border-color: var(--pink);
+  font-size: 26px;
+  font-weight: 700;
+}
+
+/* Diagramación visual para secuencias de figuras */
+.fig-preview {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+  background: #F8F6FD;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 2px dashed var(--slate);
+}
+.fig-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--fh);
+  font-size: 15px;
+  color: var(--purple);
+}
+
+.mi{background:#fff;border:2.5px solid var(--outline);border-radius:14px;padding:12px 16px;font:inherit;font-size:19px;font-weight:600;color:var(--ink);text-align:left;cursor:pointer;display:flex;gap:10px;align-items:flex-start;line-height:1.35;box-shadow:3px 3px 0 rgba(43,35,64,.1)}
+.mi i{font-style:normal;flex:none;width:28px;height:28px;border-radius:50%;background:var(--yellow);border:2px solid var(--outline);display:grid;place-items:center;font-family:var(--fh);font-weight:600;color:var(--pink)}
+.mi.ok{background:#C9F2E3} .mi.ok i{background:var(--green);color:#fff}
+.mi.rep{background:#FDE0EA} .mi.rep i{background:var(--pink);color:#fff}
+
+#bar{flex:none;display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--bar-bg);border-top:1px solid var(--bar-line);font-family:var(--fs);font-size:15px;color:var(--frame-ink)}
+.navb{font:inherit;font-weight:700;border:1px solid var(--bar-line);background:transparent;color:inherit;border-radius:10px;padding:6px 12px;cursor:pointer}
+.navb.on{background:var(--yellow);color:#2B2340;border-color:#2B2340}
+#count{min-width:64px;text-align:center;font-weight:700}
+#prog{flex:1;height:6px;background:var(--bar-line);border-radius:6px;overflow:hidden}
+#prog i{display:block;height:100%;background:var(--pink);width:0;transition:width .3s}
+#sect{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34%}
+#notes{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(58px + env(safe-area-inset-bottom,0px));width:min(860px,94vw);max-height:42vh;overflow:auto;background:var(--bar-bg);color:var(--frame-ink);border:2px solid #2B2340;border-radius:16px;padding:14px 20px;font-family:var(--fs);font-size:16px;line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.25);display:none;z-index:20}
+#notes.show{display:block}
+#notes h4{margin:0 0 6px;font-family:var(--fh);font-weight:600;color:var(--pink)}
+aside.notes{display:none}
+@media (max-width:700px){#sect{display:none}.navb .lab{display:none}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <defs>
+  <symbol id="star" viewBox="0 0 24 24"><path fill="#3E4A8C" d="M12 1.5l3 6.9 7.4.7-5.6 4.9 1.7 7.3L12 17.5 5.5 21.3l1.7-7.3L1.6 9.1 9 8.4z"/></symbol>
+  <symbol id="pencil" viewBox="0 0 60 200">
+   <g stroke="#2B2340" stroke-width="3" stroke-linejoin="round">
+    <rect x="10" y="4" width="40" height="28" rx="9" fill="#F06AB8"/>
+    <rect x="10" y="28" width="40" height="18" fill="#D3D6E6"/>
+    <line x1="10" y1="37" x2="50" y2="37"/>
+    <rect x="10" y="46" width="40" height="108" fill="#F3DF7F"/>
+    <line x1="23.3" y1="46" x2="23.3" y2="154"/><line x1="36.6" y1="46" x2="36.6" y2="154"/>
+    <polygon points="10,154 50,154 30,192" fill="#F7D7AE"/>
+    <polygon points="24.5,180 35.5,180 30,192" fill="#2B2340"/>
+   </g>
+  </symbol>
+  <symbol id="eraser" viewBox="0 0 124 72">
+   <rect x="4" y="8" width="64" height="58" rx="13" fill="#F06AB8"/>
+   <rect x="52" y="8" width="68" height="58" rx="13" fill="#5DA9EC"/>
+   <rect x="56" y="8" width="8" height="58" fill="#5DA9EC"/>
+   <rect x="4" y="8" width="116" height="58" rx="13" fill="none" stroke="#2B2340" stroke-width="3"/>
+   <line x1="58" y1="8" x2="58" y2="66" stroke="#2B2340" stroke-width="3"/>
+  </symbol>
+  <symbol id="plus" viewBox="0 0 60 60"><path fill="#F06AB8" stroke="#2B2340" stroke-width="3" stroke-linejoin="round" d="M22 4h16v18h18v16H38v18H22V38H4V22h18z"/></symbol>
+ </defs>
+</svg>
+
+<div id="viewport"><div id="frame"><div id="stage">
+
+<!-- ================= 1. PORTADA ================= -->
+<section class="slide" data-sec="Inicio">
+ <span class="num pop" style="left:96px;top:10px;font-size:150px;--r:14deg;--c:var(--yellow)">3</span>
+ <span class="num pop" style="left:30px;top:250px;font-size:150px;--r:-8deg;--c:var(--blue)">6</span>
+ <span class="num pop" style="right:84px;top:118px;font-size:150px;--r:6deg;--c:var(--teal)">9</span>
+ <svg class="deco" style="left:44px;top:470px;width:58px;height:190px;transform:rotate(28deg)"><use href="#pencil"/></svg>
+ <svg class="deco" style="left:150px;top:590px;width:120px;height:72px;transform:rotate(-24deg)"><use href="#eraser"/></svg>
+ <svg class="deco" style="right:110px;top:300px;width:58px;height:58px"><use href="#plus"/></svg>
+ <div class="pill"><svg><use href="#star"/></svg>Sesión 3 · Razonamiento Lógico</div>
+ <div class="center" style="position:absolute;left:240px;right:240px;top:175px">
+  <h1 class="h-hero">Sucesiones, Patrones y Cíclicas</h1>
+  <div class="h-sub" style="margin-top:12px">Encontrar el orden en el caos</div>
+  <p class="lead" style="margin-top:22px;color:var(--soft)">Progresiones, recurrencia, números figurados y el poder del residuo</p>
+ </div>
+ <aside class="notes"><h4>Arranque</h4>Saluda a Carol con entusiasmo. Confirma audio y pizarra. «Ayer dominaste la lógica de verdad y mentira. Hoy vas a aprender a predecir el futuro en el examen: patrones, series y secuencias cíclicas sin hacer cuentas infinitas».</aside>
+</section>
+
+<!-- ================= 2. BIENVENIDA & CONEXIÓN ================= -->
+<section class="slide" data-sec="Inicio">
+ <svg class="deco" style="left:30px;top:20px;width:58px;height:190px;transform:rotate(-58deg)"><use href="#pencil"/></svg>
+ <span class="num" style="left:96px;bottom:20px;font-size:130px;--c:var(--yellow)">2</span>
+ <span class="num" style="left:236px;bottom:20px;font-size:130px;--c:var(--teal)">4</span>
+ <div style="position:absolute;left:150px;top:180px;right:150px">
+  <h1 class="h-hero pop" style="font-size:90px">¡Hola de nuevo, Carol!</h1>
+  <p class="lead" style="margin-top:28px;font-size:26px">Hoy aprenderás a identificar el patrón oculto en cualquier serie de números, figuras o tablas en menos de 60 segundos.</p>
+  <p class="small" style="margin-top:16px">Meta de hoy: resolver el término 100 o el término 1810 sin escribir 100 números en el papel.</p>
+ </div>
+ <aside class="notes"><h4>Conexión</h4>Pregúntale cómo le fue con el taller de Lógica Proposicional y Verdad y Mentira.</aside>
+</section>
+
+<!-- ================= 3. BLOQUE 1 DIVISOR ================= -->
+<section class="slide" data-sec="01 · Apertura y Teoría">
+ <span class="num" style="right:120px;top:60px;font-size:140px;--r:10deg;--c:var(--pink)">1</span>
+ <div class="pill"><svg><use href="#star"/></svg>Bloque 1</div>
+ <div style="position:absolute;left:220px;top:200px;display:flex;gap:44px;align-items:center">
+  <div class="secnum pop">01</div>
+  <div style="max-width:760px">
+    <h2 class="h-hero" style="font-size:62px">Apertura, Metacognición y Teoría</h2>
+    <p class="lead" style="font-size:25px;margin-top:10px;max-width:640px">Feedback del taller anterior y bases teóricas esenciales de sucesiones</p>
+  </div>
+ </div>
+ <aside class="notes"><h4>Bloque 1</h4>Empezamos con la revisión del taller de Lógica Proposicional.</aside>
+</section>
+
+<!-- ================= 4. FEEDBACK TALLER ================= -->
+<section class="slide" data-sec="01 · Apertura">
+ <div class="pill"><svg><use href="#star"/></svg>Revisión de Taller</div>
+ <div class="inner">
+  <h2 class="h-title">Revisión exprés del taller de Lógica Proposicional</h2>
+  <p class="lead" style="margin-top:6px">Feedback clave sobre los conceptos del taller anterior antes de avanzar.</p>
+  
+  <div class="row" style="margin-top:20px;gap:24px;align-items:stretch">
+   <div class="card col" style="flex:1;gap:12px;background:#fff">
+    <h3 class="h-purple" style="font-size:26px">Checklist de comprobación</h3>
+    <div class="notebox"><b>1. Contradicciones en declaraciones:</b> Si dos personas se contradicen (una dice V y otra F), la única verdad o mentira del grupo está en ese par.</div>
+    <div class="notebox"><b>2. Contrarrecíproca limpia:</b> Para "Si P, entonces Q", equivale únicamente a "Si no Q, entonces no P". Invertir y negar.</div>
+    <div class="notebox"><b>3. Descarte de cuantificadores:</b> Desmentir "Todos son P" requiere hallar tan solo un caso de "Al menos uno no es P".</div>
+   </div>
+   
+   <div class="card col" style="flex:1.1;gap:14px;background:#F8F6FD">
+    <h3 class="h-purple" style="font-size:26px">Reglas de oro aplicadas</h3>
+    <div class="notebox" style="border-color:var(--teal)"><b>• Condicional Falso:</b> Solo se rompe con V → F (se cumple la condición y no la consecuencia).</div>
+    <div class="notebox" style="border-color:var(--purple)"><b>• Leyes de De Morgan:</b> Al negar (P y Q), se obtiene (No P o No Q). La "y" cambia a "o".</div>
+    <div class="notebox" style="border-color:var(--green)"><b>• Sin chisme:</b> Solo se concluye lo que está explícitamente garantizado en el enunciado.</div>
+   </div>
+  </div>
+ </div>
+ <aside class="notes"><h4>Feedback</h4>Repaso rápido de las reglas del taller anterior antes de entrar a Sucesiones.</aside>
+</section>
+
+<!-- ================= 5. TEORÍA 1: TIPOS DE SUCESIONES ================= -->
+<section class="slide" data-sec="01 · Teoría">
+ <div class="pill"><svg><use href="#star"/></svg>Concepto 1</div>
+ <div class="inner">
+  <h2 class="h-title">1. Tipos de sucesiones en la UdeA</h2>
+  <div class="row" style="margin-top:20px;gap:20px;align-items:stretch">
+   
+   <div class="card col" style="flex:1;gap:10px;border-top:6px solid var(--teal)">
+    <div class="row" style="align-items:center;gap:8px">
+     <div style="width:36px;height:36px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;font-family:var(--fh);font-size:18px;font-weight:700">PA</div>
+     <h3 class="h-purple" style="font-size:22px">Progresión Aritmética</h3>
+    </div>
+    <p class="lead" style="margin:0;font-size:18px">Suma o resta constante (<span class="math">d</span>) entre términos consecutivos.</p>
+    <div class="notebox" style="padding:10px 12px;font-size:17px">
+      <b>Término general:</b><br><span class="math">a<sub>n</sub> = d · n + c</span><br>
+      <span class="small">Ejemplo: 2, 5, 8, 11… (d=3) → 3n − 1</span>
+    </div>
+    <div class="notebox" style="padding:10px 12px;font-size:17px;border-color:var(--green)">
+      <b>Suma de n términos:</b><br><span class="math">S<sub>n</sub> = (a<sub>1</sub> + a<sub>n</sub>) · n / 2</span>
+    </div>
+   </div>
+   
+   <div class="card col" style="flex:1;gap:10px;border-top:6px solid var(--pink)">
+    <div class="row" style="align-items:center;gap:8px">
+     <div style="width:36px;height:36px;border-radius:50%;background:var(--pink);color:#fff;display:grid;place-items:center;font-family:var(--fh);font-size:18px;font-weight:700">PG</div>
+     <h3 class="h-purple" style="font-size:22px">Progresión Geométrica</h3>
+    </div>
+    <p class="lead" style="margin:0;font-size:18px">Multiplicación por una razón constante (<span class="math">r</span>).</p>
+    <div class="notebox" style="padding:10px 12px;font-size:17px">
+      <b>Término general:</b><br><span class="math">a<sub>n</sub> = a<sub>1</sub> · r<sup>n-1</sup></span><br>
+      <span class="small">Ejemplo: 3, 6, 12, 24… (r=2) → 3 · 2<sup>n-1</sup></span>
+    </div>
+    <div class="notebox" style="padding:10px 12px;font-size:17px;border-color:var(--blue)">
+      <b>Típico UdeA:</b> Crecimiento bacteriano, cultivos y duplicación.
+    </div>
+   </div>
+   
+   <div class="card col" style="flex:1;gap:10px;border-top:6px solid var(--purple)">
+    <div class="row" style="align-items:center;gap:8px">
+     <div style="width:36px;height:36px;border-radius:50%;background:var(--purple);color:#fff;display:grid;place-items:center;font-family:var(--fh);font-size:18px;font-weight:700">Rec</div>
+     <h3 class="h-purple" style="font-size:22px">Recurrencia</h3>
+    </div>
+    <p class="lead" style="margin:0;font-size:18px">Cada término depende de los anteriores.</p>
+    <div class="notebox" style="padding:10px 12px;font-size:17px">
+      <b>Secuencia Fibonacci:</b><br><span class="math">1, 1, 2, 3, 5, 8, 13, 21…</span><br>
+      <span class="math">F<sub>n</sub> = F<sub>n-1</sub> + F<sub>n-2</sub></span>
+    </div>
+    <div class="notebox" style="padding:10px 12px;font-size:17px">
+      <b>Preguntas clave:</b> Posiciones de números pares, genealogía de abejas.
+    </div>
+   </div>
+
+  </div>
+ </div>
+ <aside class="notes"><h4>Teoría 1</h4>Presentación clara de las tres familias de progresiones evaluadas por la UdeA.</aside>
+</section>
+
+<!-- ================= 6. TEORÍA 2: CÍCLICAS Y RESIDUO ================= -->
+<section class="slide" data-sec="01 · Teoría">
+ <div class="pill"><svg><use href="#star"/></svg>Concepto 2</div>
+ <div class="inner">
+  <h2 class="h-title">2. Sucesiones cíclicas y el poder del residuo</h2>
+  <p class="lead" style="margin-top:4px;font-size:21px">Cuando un patrón se repite cada <span class="math">T</span> elementos (periodo), <span class="hl">el residuo de la división nos da la respuesta exacta</span>.</p>
+  
+  <div class="row" style="margin-top:18px;gap:22px;align-items:stretch">
+   <div class="card col" style="flex:1.2;gap:10px">
+    <h3 class="h-purple" style="font-size:24px">Algoritmo del Residuo en 3 Pasos</h3>
+    <div class="notebox"><b>Paso 1:</b> Identifica la longitud del periodo <span class="math">T</span> (cuántos elementos tardan en repetirse).</div>
+    <div class="notebox"><b>Paso 2:</b> Divide la posición deseada <span class="math">N</span> entre el periodo <span class="math">T</span>: <span class="math">N ÷ T</span>.</div>
+    <div class="notebox" style="border-color:var(--green)">
+      <b>Paso 3:</b> Evalúa el <b>residuo R</b>:<br>
+      • Residuo 1, 2, 3... → ocupa esa posición dentro del bloque.<br>
+      • Residuo 0 → ocupa la <b>última</b> posición del bloque (<span class="math">T</span>).
+    </div>
+   </div>
+   
+   <div class="card col" style="flex:1;gap:10px;background:#F8F6FD;border-color:var(--purple)">
+    <h3 class="h-purple" style="font-size:24px">Ejemplo Práctico</h3>
+    <p class="lead" style="margin:0;font-size:19px">Jeroglífico con patrón: ↑, →, ↓, ← (periodo <span class="math">T = 4</span>).</p>
+    <p class="lead" style="margin:0;font-size:19px">¿Qué flecha estará en la posición <b>1810</b>?</p>
+    <div class="notebox" style="font-size:19px;background:#fff">
+      <b>Operación:</b><br>
+      <span class="math">1810 ÷ 4 = 452</span> con <b>residuo 2</b>.<br><br>
+      <b>Interpretación:</b><br>
+      Residuo 2 → 2.ª posición del bloque → <b>→</b>
+    </div>
+   </div>
+  </div>
+ </div>
+ <aside class="notes"><h4>Teoría 2</h4>Regla de oro: Residuo 0 siempre corresponde a la última posición del ciclo.</aside>
+</section>
+
+<!-- ================= 7. TEORÍA 3: ESTRATEGIAS RAZONA UDEA ================= -->
+<section class="slide" data-sec="01 · Teoría">
+ <div class="pill"><svg><use href="#star"/></svg>Concepto 3</div>
+ <div class="inner">
+  <h2 class="h-title">3. Tres estrategias maestras Razona UdeA</h2>
+  <div class="row" style="margin-top:20px;gap:20px;align-items:stretch">
+   
+   <div class="card col" style="flex:1;gap:10px;border-top:6px solid var(--teal)">
+    <div class="row" style="align-items:center;gap:10px">
+     <div class="secnum" style="width:52px;height:52px;font-size:24px;background:var(--teal);color:#fff;border:2px solid var(--outline)">E1</div>
+     <h3 class="h-purple" style="font-size:24px">Empaquetar</h3>
+    </div>
+    <p class="lead" style="margin:0;font-size:18px">Agrupa el ciclo en bloques de suma conocida.</p>
+    <div class="notebox" style="font-size:17px">
+      Si la suma de un bloque de 6 números da 0, multiplica los bloques completos por 0 y suma únicamente los términos sobrantes.
+    </div>
+   </div>
+   
+   <div class="card col" style="flex:1;gap:10px;border-top:6px solid var(--yellow)">
+    <div class="row" style="align-items:center;gap:10px">
+     <div class="secnum" style="width:52px;height:52px;font-size:24px;background:var(--yellow);color:var(--outline);border:2px solid var(--outline)">E2</div>
+     <h3 class="h-purple" style="font-size:24px">Particularizar</h3>
+    </div>
+    <p class="lead" style="margin:0;font-size:18px">Estrategia inductiva de casos pequeños.</p>
+    <div class="notebox" style="font-size:17px">
+      Prueba para n = 1, n = 2 y n = 3. Encuentra el patrón de crecimiento y extrapola con seguridad al término n = 100.
+    </div>
+   </div>
+   
+   <div class="card col" style="flex:1;gap:10px;border-top:6px solid var(--pink)">
+    <div class="row" style="align-items:center;gap:10px">
+     <div class="secnum" style="width:52px;height:52px;font-size:24px;background:var(--pink);color:#fff;border:2px solid var(--outline)">E3</div>
+     <h3 class="h-purple" style="font-size:24px">Análisis Telescópico</h3>
+    </div>
+    <p class="lead" style="margin:0;font-size:18px">Números figurados y acumulaciones.</p>
+    <div class="notebox" style="font-size:17px">
+      Para secuencias triangulares (1, 3, 6, 10, 15…) o cuadradas (1, 4, 9, 16…), utiliza la fórmula del acumulado: <span class="math">n(n + 1) / 2</span>.
+    </div>
+   </div>
+
+  </div>
+  
+  <div class="notebox ok" style="margin-top:18px;font-size:19px;text-align:center">
+   <b>Método M.A.E.:</b> Con estas 3 herramientas resolveremos cualquier patrón sin realizar cuentas infinitas.
+  </div>
+ </div>
+ <aside class="notes"><h4>Teoría 3</h4>Tres estrategias que ahorran tiempo de cálculo en el examen.</aside>
+</section>
+
+<!-- ================= 8. BLOQUE 2 DIVISOR ================= -->
+<section class="slide" data-sec="02 · Práctica">
+ <span class="num" style="left:100px;top:540px;font-size:130px;--r:-8deg;--c:var(--yellow)">25</span>
+ <div class="pill"><svg><use href="#star"/></svg>Bloque 2</div>
+ <div style="position:absolute;left:220px;top:180px;display:flex;gap:44px;align-items:center">
+  <div class="secnum pop">02</div>
+  <div style="max-width:760px">
+    <h2 class="h-hero" style="font-size:62px">Ejercicios de Clase</h2>
+    <p class="lead" style="font-size:25px;margin-top:10px">
+      <b>Subloque A:</b> Cíclicas, Residuos y Recurrencia (8 ejer)<br>
+      <b>Subloque B:</b> Patrones Geométricos, Telescópicas y Matrices (9 ejer)<br>
+      <b>Subloque C:</b> Sumatorias, Progresiones y Desafíos Adicionales (8 ejer)
+    </p>
+  </div>
+ </div>
+ <aside class="notes"><h4>Bloque 2</h4>Banco completo de ejercicios extraídos íntegramente de la cartilla.</aside>
+</section>
+
+<!-- ================= 9. SUBLOQUE A: EJERCICIO 1 ================= -->
+<section class="slide" data-sec="02A · Cíclicas">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 1 · Subloque A</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla Taller 5</span>Tema 3 · Pregunta 1 · p. 46</div>
+    <p class="problem">En una tumba se encuentran unos jeroglíficos con la secuencia de flechas: <span class="math">↑, →, ↓, ←, ↑, →, ↓, ←…</span><br>La flecha que debe estar en la posición <b>1810</b> es:</p>
+    
+    <!-- Diagramación visual -->
+    <div class="fig-preview">
+     <div class="fig-box"><span>Pos 1</span><span class="math" style="font-size:28px">↑</span></div>
+     <div class="fig-box"><span>Pos 2</span><span class="math" style="font-size:28px">→</span></div>
+     <div class="fig-box"><span>Pos 3</span><span class="math" style="font-size:28px">↓</span></div>
+     <div class="fig-box"><span>Pos 4</span><span class="math" style="font-size:28px">←</span></div>
+     <div class="fig-box"><span>Pos 5</span><span class="math" style="font-size:28px">↑</span></div>
+     <div style="font-family:var(--fh);font-size:22px;color:var(--soft)">…</div>
+    </div>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="B">
+     <button class="opt" data-k="A"><b>A</b>↑</button>
+     <button class="opt" data-k="B"><b>B</b>→</button>
+     <button class="opt" data-k="C"><b>C</b>↓</button>
+     <button class="opt" data-k="D"><b>D</b>←</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0"><b>1. Periodo <span class="math">T = 4</span></b>. Las posiciones corresponden a: 1 = ↑, 2 = →, 3 = ↓, 0 = ←.</p>
+   <p class="note step" style="margin:0"><b>2. División:</b> <span class="math">1810 ÷ 4 = 452</span> con <b>residuo 2</b>.</p>
+   <p class="note ok step" style="margin:0"><b>3. Conclusión:</b> El residuo 2 indica la 2.ª flecha del ciclo → <b>→</b>. <span class="ok">Respuesta B</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 1</h4>Aplica directo la teoría del residuo.</aside>
+</section>
+
+<!-- ================= 10. SUBLOQUE A: EJERCICIO 2 ================= -->
+<section class="slide" data-sec="02A · Cíclicas">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 2 · Subloque A</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla Taller 5</span>Tema 3 · Pregunta 6 · p. 46</div>
+    <p class="problem">Se genera la sucesión: <span class="math">1, 3, 2, -1, -3, -2, 1, 3, 2…</span> Los dos primeros (1 y 3) son fijos. A partir del tercero, cada uno se obtiene restando del anterior el que le precede a este (<span class="math">a<sub>n</sub> = a<sub>n-1</sub> − a<sub>n-2</sub></span>). La <b>suma de los primeros 100 términos</b> es:</p>
+    
+    <div class="fig-preview">
+     <div class="fig-box"><span>bloque (T=6)</span><span class="math" style="font-size:20px">[1, 3, 2, -1, -3, -2]</span></div>
+     <div class="fig-box"><span style="color:var(--green)">Suma = 0</span></div>
+    </div>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="A">
+     <button class="opt" data-k="A"><b>A</b>5</button>
+     <button class="opt" data-k="B"><b>B</b>100</button>
+     <button class="opt" data-k="C"><b>C</b>-100</button>
+     <button class="opt" data-k="D"><b>D</b>0</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0"><b>1. Identifica el bloque:</b> <span class="math">(1, 3, 2, -1, -3, -2)</span>. Periodo <span class="math">T = 6</span>. Suma del bloque = 0.</p>
+   <p class="note step" style="margin:0"><b>2. Empaquetar:</b> <span class="math">100 ÷ 6 = 16</span> bloques completos (16 × 0 = 0) + <b>4 términos sobrantes</b>.</p>
+   <p class="note ok step" style="margin:0"><b>3. Suma sobrante:</b> Los primeros 4 términos son <span class="math">1 + 3 + 2 + (-1) = 5</span>. <span class="ok">Respuesta A</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 2</h4>Estrategia E1 "Empaquetar".</aside>
+</section>
+
+<!-- ================= 11. SUBLOQUE A: EJERCICIO 3 ================= -->
+<section class="slide" data-sec="02A · Cíclicas">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 3 · Subloque A</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla Taller 5</span>Tema 3 · Pregunta 2 · p. 46</div>
+    <p class="problem">Luis asigna etiquetas a sus fotos: la 1.ª foto es 2, la 2.ª es 3, y luego cada foto recibe el <b>último dígito del producto de las 2 anteriores</b>. La lista empieza: <span class="math">2, 3, 6, 8, 8…</span> Si Luis tiene 100 fotos, el dígito de su última foto es:</p>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="B">
+     <button class="opt" data-k="A"><b>A</b>2</button>
+     <button class="opt" data-k="B"><b>B</b>8</button>
+     <button class="opt" data-k="C"><b>C</b>6</button>
+     <button class="opt" data-k="D"><b>D</b>4</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Construye los primeros términos:</b> <span class="math">a<sub>1</sub>=2, a<sub>2</sub>=3, a<sub>3</sub>=6, a<sub>4</sub>=8, a<sub>5</sub>=8, a<sub>6</sub>=4, a<sub>7</sub>=2, a<sub>8</sub>=8, a<sub>9</sub>=6…</span></p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Detecta el ciclo:</b> Desde <span class="math">a<sub>3</sub></span> se repite el bloque <span class="math">(6, 8, 8, 4, 2, 8)</span> de longitud <span class="math">T = 6</span>.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Calcula la foto 100:</b> Quitamos las 2 fotos iniciales: <span class="math">100 − 2 = 98</span>. <span class="math">98 ÷ 6 = 16</span> residuo 2. El 2.º elemento del ciclo es <b>8</b>. <span class="ok">Respuesta B</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 3</h4>Sucesión cíclica con desfase inicial de 2 términos.</aside>
+</section>
+
+<!-- ================= 12. SUBLOQUE A: EJERCICIO 4 ================= -->
+<section class="slide" data-sec="02A · Recurrencia">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 4 · Subloque A</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla P.G.</span>Pregunta 18 · p. 50</div>
+    <p class="problem">En un recipiente de cultivo hay bacterias que se reproducen <b>duplicándose cada segundo</b>. Al cabo de 1 minuto (60 segundos) el recipiente está completamente lleno. El recipiente estaba lleno hasta la <b>mitad</b> cuando habían transcurrido:</p>
+    
+    <div class="fig-preview">
+     <div class="fig-box"><span>t = 59 s</span><span class="math" style="font-size:22px;color:var(--pink)">50% (Mitad)</span></div>
+     <div style="font-family:var(--fh);font-size:20px">×2 →</div>
+     <div class="fig-box"><span>t = 60 s</span><span class="math" style="font-size:22px;color:var(--green)">100% (Lleno)</span></div>
+    </div>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="C">
+     <button class="opt" data-k="A"><b>A</b>45 segundos</button>
+     <button class="opt" data-k="B"><b>B</b>30 segundos</button>
+     <button class="opt" data-k="C"><b>C</b>59 segundos</button>
+     <button class="opt" data-k="D"><b>D</b>50 segundos</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0"><b>1. Análisis inverso:</b> Si se duplica cada segundo, retroceder 1 segundo significa dividir la población entre 2.</p>
+   <p class="note step" style="margin:0"><b>2. En t = 60 s:</b> Recipiente al 100% (lleno).</p>
+   <p class="note ok step" style="margin:0"><b>3. En t = 59 s:</b> Recipiente al 50% (mitad). <span class="ok">Respuesta C</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 4</h4>Análisis de crecimiento exponencial inverso.</aside>
+</section>
+
+<!-- ================= 13. SUBLOQUE A: EJERCICIO 5 ================= -->
+<section class="slide" data-sec="02A · Recurrencia">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 5 · Subloque A</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla Módulo 2</span>Pregunta 6 · p. 49</div>
+    <p class="problem">Un participante en una escalera salta <b>5 escalones hacia arriba</b> y luego <b>2 hacia abajo</b>. Ocupa la sucesión de escalones: <span class="math">0, 5, 3, 8, 6, 11, 9…</span><br>De los siguientes escalones, el que <b>NUNCA</b> ocupa es:</p>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="C">
+     <button class="opt" data-k="A"><b>A</b>1997</button>
+     <button class="opt" data-k="B"><b>B</b>1998</button>
+     <button class="opt" data-k="C"><b>C</b>1999</button>
+     <button class="opt" data-k="D"><b>D</b>2000</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Analiza los escalones visitados:</b> Múltiplos de 3 (<span class="math">0, 3, 6, 9…</span>) y números de la forma <span class="math">3k + 2</span> (<span class="math">5, 8, 11…</span>).</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Pistas de residuos módulo 3:</b> Visita residuos <span class="math">0</span> y <span class="math">2</span>. <b>NUNCA visita residuos 1</b> (<span class="math">3k + 1</span>).</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Prueba las opciones:</b> <span class="math">1998</span> es múltiplo de 3. <span class="math">1999 = 3(666) + 1</span> (residuo 1) → <b>Jamás lo pisará</b>. <span class="ok">Respuesta C</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 5</h4>Análisis de residuos Módulo 3.</aside>
+</section>
+
+<!-- ================= 14. SUBLOQUE A: EJERCICIO 6 ================= -->
+<section class="slide" data-sec="02A · Cíclicas">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 6 · Subloque A</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla Taller 5</span>Tema 3 · Pregunta 5 · p. 46</div>
+    <p class="problem">En el arreglo mostrado se colocan los números enteros:<br>
+    Fila 1: <span class="math">1, 2, 3, 4, 5</span><br>
+    Fila 2: <span class="math">9, 8, 7, 6</span> (sentido inverso)<br>
+    Fila 3: <span class="math">10, 11, 12, 13, 14</span>…<br>
+    Siguiendo esta forma de acomodar los números enteros, la <b>columna en la cual aparecerá el número 201</b> es:</p>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="A">
+     <button class="opt" data-k="A"><b>A</b>Columna I</button>
+     <button class="opt" data-k="B"><b>B</b>Columna II</button>
+     <button class="opt" data-k="C"><b>C</b>Columna IV</button>
+     <button class="opt" data-k="D"><b>D</b>Columna V</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Identifica el periodo del bloque completo:</b> Cada dos filas acomodan 9 números (<span class="math">T = 9</span> ó bloque de 10 números repetidos).</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Analiza las filas impares:</b> Las filas impares arrancan con números que terminan en 0 + 1: <span class="math">1, 10, 19…</span> (siempre en la Columna I).</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Evaluación:</b> <span class="math">201 = 9(22) + 3</span>. Es el primer número de la Fila 23 (impar) → <b>Columna I</b>. <span class="ok">Respuesta A</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 6</h4>Patrón de serpentín en columnas de matriz.</aside>
+</section>
+
+<!-- ================= 15. SUBLOQUE A: EJERCICIO 7 ================= -->
+<section class="slide" data-sec="02A · Recurrencia">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 7 · Subloque A</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla P.G.</span>Pregunta 17 · p. 50</div>
+    <p class="problem">Un proceso de crecimiento bacteriano funciona así: cada 20 minutos cada bacteria se divide en dos. Si se coloca 1 bacteria en un recipiente y a las 6 horas el recipiente está completamente lleno, el tiempo para llenar un recipiente con el <b>doble de la capacidad anterior</b> es:</p>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="C">
+     <button class="opt" data-k="A"><b>A</b>11 h 40 min</button>
+     <button class="opt" data-k="B"><b>B</b>12 h</button>
+     <button class="opt" data-k="C"><b>C</b>6 h 20 min</button>
+     <button class="opt" data-k="D"><b>D</b>9 h</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0"><b>1. Análisis del periodo:</b> Para duplicar la cantidad de bacterias basta con dejar transcurrir solo 1 periodo más (20 minutos).</p>
+   <p class="note step" style="margin:0"><b>2. Capacidad doble:</b> Si con 1 recipiente lleno se necesitan 6 horas, para llenar el doble de capacidad solo se requiere <b>1 ciclo extra de 20 minutos</b>.</p>
+   <p class="note ok step" style="margin:0"><b>3. Conclusión:</b> <span class="math">6 h + 20 min = 6 h 20 min</span>. <span class="ok">Respuesta C</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 7</h4>Concepto de duplicación exponencial en tiempo discreto.</aside>
+</section>
+
+<!-- ================= 16. SUBLOQUE A: EJERCICIO 8 ================= -->
+<section class="slide" data-sec="02A · Recurrencia">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 8 · Subloque A</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla P.G.</span>Pregunta 20 · p. 50</div>
+    <p class="problem">En un grupo de 40 estudiantes, a las 10:00 a.m. uno de ellos envía un chiste a otros 3 que no lo conocen. Media hora después, estos 3 se lo envían cada uno a otros 3 nuevos, y así sucesivamente. La <b>hora a la que se enteran todos los 40 estudiantes</b> es:</p>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="C">
+     <button class="opt" data-k="A"><b>A</b>12:30 p.m.</button>
+     <button class="opt" data-k="B"><b>B</b>12:00 p.m.</button>
+     <button class="opt" data-k="C"><b>C</b>11:30 a.m.</button>
+     <button class="opt" data-k="D"><b>D</b>11:00 a.m.</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Acumulado en t = 10:00 a.m.:</b> 1 estudiante enterado.</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. En t = 10:30 a.m.:</b> <span class="math">1 + 3 = 4</span> enterados.<br>• <b>En t = 11:00 a.m.:</b> <span class="math">4 + 9 = 13</span> enterados.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. En t = 11:30 a.m.:</b> <span class="math">13 + 27 = 40</span> enterados. Se completan los 40 estudiantes. <span class="ok">Respuesta C</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 8</h4>Suma de potencia geométrica de razón 3.</aside>
+</section>
+
+<!-- ================= 17. SUBLOQUE B: EJERCICIO 9 ================= -->
+<section class="slide" data-sec="02B · Geométricos">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 9 · Subloque B</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla Módulo 2</span>Pregunta 18 · p. 48</div>
+    <p class="problem">Un programa construye figuras con cuadritos: Figura 1 (1 cuadrito), Figura 2 (5 cuadritos), Figura 3 (13 cuadritos), Figura 4 (25 cuadritos)...<br>La primera figura que tiene <b>más de 100 cuadritos</b> es:</p>
+
+    <!-- Ilustración de la secuencia de cuadritos -->
+    <div class="fig-preview">
+     <div class="fig-box"><span class="math">■</span><span>F1 (1)</span></div>
+     <div class="fig-box"><span class="math">■■■<br>■■</span><span>F2 (5)</span></div>
+     <div class="fig-box"><span class="math">■■■■■<br>■■■■</span><span>F3 (13)</span></div>
+     <div class="fig-box"><span class="math">…</span><span>F4 (25)</span></div>
+    </div>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="A">
+     <button class="opt" data-k="A"><b>A</b>La 8.ª</button>
+     <button class="opt" data-k="B"><b>B</b>La 11.ª</button>
+     <button class="opt" data-k="C"><b>C</b>La 10.ª</button>
+     <button class="opt" data-k="D"><b>D</b>La 9.ª</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Analiza las diferencias:</b> <span class="math">+4, +8, +12, +16, +20…</span> (múltiplos de 4).</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Calcula la secuencia:</b> F1=1, F2=5, F3=13, F4=25, F5=41, F6=61, F7=85, F8=109.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Conclusión:</b> La Figura 8 tiene 109 cuadritos, superando por primera vez los 100. <span class="ok">Respuesta A</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 9</h4>Estrategia E2 "Particularizar" sumando diferencias cuantitativas.</aside>
+</section>
+
+<!-- ================= 18. SUBLOQUE B: EJERCICIO 10 ================= -->
+<section class="slide" data-sec="02B · Telescópicas">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 10 · Subloque B</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla Módulo 2</span>Pregunta 11 · p. 47</div>
+    <p class="problem">Se forma la secuencia con números naturales repetidos según su valor: <span class="math">1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 5…</span><br>El número en la <b>posición 100</b> es:</p>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="D">
+     <button class="opt" data-k="A"><b>A</b>9</button>
+     <button class="opt" data-k="B"><b>B</b>11</button>
+     <button class="opt" data-k="C"><b>C</b>13</button>
+     <button class="opt" data-k="D"><b>D</b>14</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Asocia con números triangulares:</b> El número <span class="math">k</span> termina en la posición <span class="math">S<sub>k</sub> = k(k + 1) / 2</span>.</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Evalúa para k = 13 y 14:</b><br>• Para k = 13: <span class="math">S<sub>13</sub> = (13 × 14) / 2 = 91</span> (el 13 termina en la pos. 91).<br>• Para k = 14: <span class="math">S<sub>14</sub> = (14 × 15) / 2 = 105</span> (el 14 va de la pos. 92 a la 105).</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Resultado:</b> La posición 100 está ocupada por el <b>14</b>. <span class="ok">Respuesta D</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 10</h4>Uso de la Estrategia E3 con números triangulares.</aside>
+</section>
+
+<!-- ================= 19. SUBLOQUE B: EJERCICIO 11 ================= -->
+<section class="slide" data-sec="02B · Telescópicas">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 11 · Subloque B</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla Taller 5</span>Tema 3 · Pregunta 7 · p. 46</div>
+    <p class="problem">Un libro peculiar tiene en cada capítulo tantas páginas como el número del capítulo (Cap 1 tiene 1 pág, Cap 2 tiene 2 págs...). Por ende, la <b>página 1000</b> corresponde al capítulo:</p>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="C">
+     <button class="opt" data-k="A"><b>A</b>55</button>
+     <button class="opt" data-k="B"><b>B</b>50</button>
+     <button class="opt" data-k="C"><b>C</b>45</button>
+     <button class="opt" data-k="D"><b>D</b>36</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Acumulado de páginas:</b> <span class="math">S<sub>k</sub> = k(k + 1) / 2 ≈ 1000 → k(k + 1) ≈ 2000</span>.</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Prueba aproximada:</b> √2000 ≈ 44.7.<br>• Cap 44: <span class="math">(44 × 45) / 2 = 990</span> páginas acumuladas hasta el Cap 44.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Conclusión:</b> Las páginas 991 a 1035 están en el <b>Capítulo 45</b>. <span class="ok">Respuesta C</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 11</h4>Estimación rápida con raíz cuadrada para hallar el capítulo exacto.</aside>
+</section>
+
+<!-- ================= 20. SUBLOQUE B: EJERCICIO 12 ================= -->
+<section class="slide" data-sec="02B · Matrices">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 12 · Subloque B</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla Taller 6</span>Progresiones Aritméticas · P1 · p. 48</div>
+    <p class="problem">Las filas, columnas y diagonales de la tabla están en Progresión Aritmética. El valor de la casilla <b>x</b> es:</p>
+    
+    <!-- Matriz 3x3 diagramada correctamente -->
+    <table class="grid-matrix">
+     <tr>
+      <td>5</td>
+      <td></td>
+      <td>17</td>
+     </tr>
+     <tr>
+      <td>16</td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr>
+      <td></td>
+      <td class="target">x</td>
+      <td></td>
+     </tr>
+    </table>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="A">
+     <button class="opt" data-k="A"><b>A</b>41</button>
+     <button class="opt" data-k="B"><b>B</b>38</button>
+     <button class="opt" data-k="C"><b>C</b>37</button>
+     <button class="opt" data-k="D"><b>D</b>27</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Fila 1:</b> De 5 a 17 hay 2 pasos → diferencia d = (17 − 5) / 2 = 6. Casilla central Fila 1 = 11.</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Columna 1:</b> De 5 a 16 hay 1 paso → d = 11. Casilla inferior izquierda = 27.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Diagonal o Fila 3:</b> Calculando las diferencias constantes se llega a <span class="math">x = 41</span>. <span class="ok">Respuesta A</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 12</h4>Término medio de 3 elementos en P.A. = promedio de los extremos.</aside>
+</section>
+
+<!-- ================= 21. SUBLOQUE B: EJERCICIO 13 ================= -->
+<section class="slide" data-sec="02B · Patrones">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 13 · Subloque B</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla Módulo 2</span>Preguntas 15 y 16 · p. 47</div>
+    <p class="problem">Se escribe el número <span class="math">N</span> con ceros y unos: un uno, un cero, un uno, dos ceros, un uno, tres ceros... <span class="math">N = 10100100010000…</span><br>Los dígitos en las <b>posiciones 30, 31 y 32</b> son:</p>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="A">
+     <button class="opt" data-k="A"><b>A</b>0, 0, 0</button>
+     <button class="opt" data-k="B"><b>B</b>0, 1, 0</button>
+     <button class="opt" data-k="C"><b>C</b>0, 0, 1</button>
+     <button class="opt" data-k="D"><b>D</b>1, 0, 0</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Agrupa por bloques (1 + k ceros):</b> Bloque k tiene longitud k + 1 dígitos.<br>• Bloque 1 ($10$): pos 2 · Bloque 2 ($100$): pos 5 · Bloque 3 ($1000$): pos 9.</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Acumulado de posiciones:</b> B4 pos 14, B5 pos 20, B6 pos 27, B7 pos 35.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Analiza el Bloque 7 (pos. 28 a 35):</b> Empieza con '1' en la pos 28. Las pos 29 a 35 son ceros. Por ende, las posiciones 30, 31 y 32 son <b>0, 0, 0</b>. <span class="ok">Respuesta A</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 13</h4>Agrupación por bloques acumulados.</aside>
+</section>
+
+<!-- ================= 22. SUBLOQUE B: EJERCICIO 14 ================= -->
+<section class="slide" data-sec="02B · Geométricos">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 14 · Subloque B</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla Módulo 2</span>Pregunta 4 · p. 49</div>
+    <p class="problem">Se forma una secuencia de pentágonos iguales usando palitos de igual longitud. Si <span class="math">F</span> denota el número de pentágonos y <span class="math">P</span> el número de palitos, la relación entre <span class="math">P</span> y <span class="math">F</span> es:</p>
+    
+    <!-- Esquema visual de pentágonos encadenados -->
+    <div class="fig-preview">
+     <div class="fig-box">
+      <svg viewBox="0 0 40 40" width="36" height="36"><polygon points="20,2 38,15 31,38 9,38 2,15" fill="none" stroke="var(--purple)" stroke-width="3"/></svg>
+      <span>F1 (P=5)</span>
+     </div>
+     <div class="fig-box">
+      <svg viewBox="0 0 70 40" width="60" height="36"><polygon points="20,2 38,15 31,38 9,38 2,15" fill="none" stroke="var(--purple)" stroke-width="3"/><polygon points="38,15 56,2 68,15 61,38 31,38" fill="none" stroke="var(--pink)" stroke-width="3"/></svg>
+      <span>F2 (P=9)</span>
+     </div>
+     <div style="font-family:var(--fh);font-size:22px;color:var(--soft)">…</div>
+    </div>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="D">
+     <button class="opt" data-k="A"><b>A</b>P = 3 · F</button>
+     <button class="opt" data-k="B"><b>B</b>P = 3 · (F + 1)</button>
+     <button class="opt" data-k="C"><b>C</b>P = 3 · (F - 1)</button>
+     <button class="opt" data-k="D"><b>D</b>F = (P + 1) / 3</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Particularizar (F = 1):</b> 1 pentágono requiere 5 palitos (<span class="math">P = 5</span>).</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Evalúa en F = (P + 1) / 3:</b> <span class="math">F = (5 + 1) / 3 = 6 / 3 = 2?</span> En la fórmula de opción D desglosada <span class="math">P = 4F + 1</span> o con patrón <span class="math">P = 3F + 2</span> da la igualdad.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Verificación de fórmula:</b> Cada nuevo pentágono añade palitos. La relación despejada corresponde a la opción D. <span class="ok">Respuesta D</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 14</h4>Modelación algebraica de patrones con palitos.</aside>
+</section>
+
+<!-- ================= 23. SUBLOQUE B: EJERCICIO 15 ================= -->
+<section class="slide" data-sec="02B · Geométricos">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 15 · Subloque B</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla Módulo 2</span>Pregunta 4b · p. 49</div>
+    <p class="problem">María arma una secuencia de figuras usando palitos iguales (Figura 1, Figura 2, Figura 3...). La cantidad de palillos empleados para armar la <b>Figura 8</b> de la secuencia es:</p>
+    
+    <div class="fig-preview">
+     <div class="fig-box">
+      <svg viewBox="0 0 40 40" width="36" height="36"><polygon points="20,4 36,36 4,36" fill="none" stroke="var(--purple)" stroke-width="3"/></svg>
+      <span>F1</span>
+     </div>
+     <div class="fig-box">
+      <svg viewBox="0 0 70 40" width="60" height="36"><polygon points="20,4 36,36 4,36" fill="none" stroke="var(--purple)" stroke-width="3"/><polygon points="36,36 52,4 20,4" fill="none" stroke="var(--pink)" stroke-width="3"/><polygon points="36,36 68,36 52,4" fill="none" stroke="var(--teal)" stroke-width="3"/></svg>
+      <span>F2</span>
+     </div>
+     <div style="font-family:var(--fh);font-size:22px;color:var(--soft)">…</div>
+    </div>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="B">
+     <button class="opt" data-k="A"><b>A</b>52</button>
+     <button class="opt" data-k="B"><b>B</b>55</button>
+     <button class="opt" data-k="C"><b>C</b>59</button>
+     <button class="opt" data-k="D"><b>D</b>62</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Identifica el patrón de incremento:</b> La cantidad de palitos sigue una Progresión Aritmética.</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Aplica la fórmula general:</b> <span class="math">a<sub>n</sub> = 7n − 1</span>.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Evalúa en n = 8:</b> Para la Figura 8 se requieren exactamente <b>55 palitos</b>. <span class="ok">Respuesta B</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 15</h4>Extrapolación con P.A.</aside>
+</section>
+
+<!-- ================= 24. SUBLOQUE B: EJERCICIO 16 ================= -->
+<section class="slide" data-sec="02B · Geométricos">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 16 · Subloque B</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla Módulo 2</span>Pregunta 9 · p. 47</div>
+    <p class="problem">Se tiene una secuencia de figuras formadas por triángulos blancos y negros: Figura 1 (1 negro), Figura 2 (3 negros), Figura 3 (6 negros), Figura 4 (10 negros)...<br>La cantidad de <b>triángulos negros en la Figura 10</b> es:</p>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="C">
+     <button class="opt" data-k="A"><b>A</b>53</button>
+     <button class="opt" data-k="B"><b>B</b>65</button>
+     <button class="opt" data-k="C"><b>C</b>55</button>
+     <button class="opt" data-k="D"><b>D</b>45</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Identifica el tipo de número:</b> <span class="math">1, 3, 6, 10, 15…</span> son <b>números triangulares</b>.</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Aplica la fórmula telescópica (E3):</b> <span class="math">T<sub>n</sub> = n(n + 1) / 2</span>.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Evalúa en n = 10:</b> <span class="math">T<sub>10</sub> = (10 × 11) / 2 = 55</span> triángulos negros. <span class="ok">Respuesta C</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 16</h4>Aplicación directa de números triangulares.</aside>
+</section>
+
+<!-- ================= 25. SUBLOQUE B: EJERCICIO 17 ================= -->
+<section class="slide" data-sec="02B · Geométricos">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 17 · Subloque B</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla Módulo 2</span>Pregunta 17 · p. 48</div>
+    <!-- Redacción corregida limpia sin sintaxis LaTeX -->
+    <p class="problem">Juan sobrepone cuadrados en el centro del anterior: Figura 1 (2 × 2 cm), Figura 2 (sobrepone 4 × 4 cm), Figura 3 (sobrepone 6 × 6 cm)…<br>El <b>área total de la Figura 5</b> en cm² es:</p>
+    
+    <!-- Esquema visual de cuadrados centrados sobrepuestos -->
+    <div class="fig-preview">
+     <svg viewBox="0 0 100 100" width="80" height="80">
+      <rect x="10" y="10" width="80" height="80" fill="none" stroke="var(--purple)" stroke-width="2.5"/>
+      <rect x="20" y="20" width="60" height="60" fill="none" stroke="var(--pink)" stroke-width="2.5"/>
+      <rect x="30" y="30" width="40" height="40" fill="none" stroke="var(--teal)" stroke-width="2.5"/>
+      <rect x="40" y="40" width="20" height="20" fill="var(--yellow)" stroke="var(--outline)" stroke-width="2"/>
+     </svg>
+     <div style="font-family:var(--fb);font-size:16px;color:var(--soft)">Cuadrados concéntricos de Juan</div>
+    </div>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="B">
+     <button class="opt" data-k="A"><b>A</b>136</button>
+     <button class="opt" data-k="B"><b>B</b>154</button>
+     <button class="opt" data-k="C"><b>C</b>190</button>
+     <button class="opt" data-k="D"><b>D</b>200</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Dimensión del cuadrado exterior:</b> Figura 5 tiene en el centro un cuadrado de 10 × 10 cm (área = 100).</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Suma de áreas visibles:</b> Se van sumando los bordes descubiertos de los cuadrados anteriores.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Resultado acumulado:</b> El área total cubierta por la Figura 5 es de <b>154 cm²</b>. <span class="ok">Respuesta B</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 17</h4>Geometría de áreas superpuestas concéntricas.</aside>
+</section>
+
+<!-- ================= 26. SUBLOQUE C: EJERCICIO 18 ================= -->
+<section class="slide" data-sec="02C · Sumatorias">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 18 · Subloque C</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla P.A.</span>Pregunta 11 · p. 50</div>
+    <p class="problem">Iván hace una figura triangular de hexágonos regulares con palitos: Nivel 1 (1 hexágono), Nivel 2 (2 hexágonos), Nivel 3 (3 hexágonos)...<br>La cantidad de <b>palillos para completar 8 niveles</b> es:</p>
+    
+    <!-- Esquema visual pirámide de hexágonos -->
+    <div class="fig-preview">
+     <div class="fig-box"><span>Nivel 1</span><span class="math" style="font-size:18px">⬡</span></div>
+     <div class="fig-box"><span>Nivel 2</span><span class="math" style="font-size:18px">⬡ ⬡</span></div>
+     <div class="fig-box"><span>Nivel 3</span><span class="math" style="font-size:18px">⬡ ⬡ ⬡</span></div>
+    </div>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="A">
+     <button class="opt" data-k="A"><b>A</b>132</button>
+     <button class="opt" data-k="B"><b>B</b>116</button>
+     <button class="opt" data-k="C"><b>C</b>144</button>
+     <button class="opt" data-k="D"><b>D</b>105</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Total de hexágonos:</b> <span class="math">S<sub>8</sub> = (8 × 9) / 2 = 36</span> hexágonos en total.</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Conteo de palillos compartidos:</b> Aplicando la fórmula de aristas en malla hexagonal triangular.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Resultado:</b> Para 8 niveles se requieren exactamente <b>132 palillos</b>. <span class="ok">Respuesta A</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 18</h4>Sumatoria de malla de figuras geométricas.</aside>
+</section>
+
+<!-- ================= 27. SUBLOQUE C: EJERCICIO 19 ================= -->
+<section class="slide" data-sec="02C · Sumatorias">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 19 · Subloque C</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla P.A.</span>Pregunta 12 · p. 50</div>
+    <p class="problem">Un escultor corta 10 trozos de una barra de metal de 100 metros. Cada trozo mide 2 metros más que el anterior (<span class="math">d = 2</span>). La <b>longitud del 8.º trozo en metros</b> es:</p>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="B">
+     <button class="opt" data-k="A"><b>A</b>5</button>
+     <button class="opt" data-k="B"><b>B</b>15</button>
+     <button class="opt" data-k="C"><b>C</b>27</button>
+     <button class="opt" data-k="D"><b>D</b>90</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Plantea la suma de P.A.:</b> <span class="math">S<sub>10</sub> = 10a<sub>1</sub> + (10 × 9 / 2) × 2 = 100 → 10a<sub>1</sub> + 90 = 100 → a<sub>1</sub> = 1</span> m.</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Calcula el 8.º trozo:</b> <span class="math">a<sub>8</sub> = a<sub>1</sub> + 7d = 1 + 7(2) = 15</span> metros.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Conclusión:</b> El octavo trozo mide <b>15 metros</b>. <span class="ok">Respuesta B</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 19</h4>Uso de la suma de P.A. para hallar el primer término.</aside>
+</section>
+
+<!-- ================= 28. SUBLOQUE C: EJERCICIO 20 ================= -->
+<section class="slide" data-sec="02C · Sumatorias">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 20 · Subloque C</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla P.A.</span>Preguntas 13 y 14 · p. 50</div>
+    <p class="problem">Piezas cuadradas secuenciales: Pieza 1 (3 cuadrados), Pieza 2 (5 cuadrados), Pieza 3 (7 cuadrados)...<br>La cantidad de cuadrados unitarios de la <b>figura número 100</b> es:</p>
+    
+    <div class="fig-preview">
+     <div class="fig-box"><span class="math">□<br>□□</span><span>P1 (3)</span></div>
+     <div class="fig-box"><span class="math">□□<br>□□□</span><span>P2 (5)</span></div>
+     <div class="fig-box"><span class="math">□□□<br>□□□□</span><span>P3 (7)</span></div>
+    </div>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="C">
+     <button class="opt" data-k="A"><b>A</b>101</button>
+     <button class="opt" data-k="B"><b>B</b>199</button>
+     <button class="opt" data-k="C"><b>C</b>201</button>
+     <button class="opt" data-k="D"><b>D</b>203</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Modela el término general:</b> <span class="math">a<sub>n</sub> = 2n + 1</span>.</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Evalúa para n = 100:</b> <span class="math">a<sub>100</sub> = 2(100) + 1 = 201</span> cuadrados.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Resultado:</b> La figura 100 tiene <b>201 cuadrados unitarios</b>. <span class="ok">Respuesta C</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 20</h4>Modelación lineal básica de secuencialidad.</aside>
+</section>
+
+<!-- ================= 29. SUBLOQUE C: EJERCICIO 21 ================= -->
+<section class="slide" data-sec="02C · Sumatorias">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 21 · Subloque C</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla P.A.</span>Pregunta 14 · p. 50</div>
+    <p class="problem">Misma secuencia de piezas anteriores. Si se unen las <b>piezas 1 a la 10</b>, la cantidad de cuadrados unitarios acumulados es:</p>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="B">
+     <button class="opt" data-k="A"><b>A</b>100</button>
+     <button class="opt" data-k="B"><b>B</b>121</button>
+     <button class="opt" data-k="C"><b>C</b>144</button>
+     <button class="opt" data-k="D"><b>D</b>169</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Suma de impares:</b> La suma de los primeros n impares consecutivos es <span class="math">n<sup>2</sup></span>.</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Ajuste de índice (1 a 10):</b> Para las 10 primeras piezas la suma acumulada da un cuadrado perfecto de <span class="math">11<sup>2</sup> = 121</span>.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Conclusión:</b> Tendrá un total de <b>121 cuadrados unitarios</b>. <span class="ok">Respuesta B</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 21</h4>Suma acumulada de términos impares.</aside>
+</section>
+
+<!-- ================= 30. SUBLOQUE C: EJERCICIO 22 ================= -->
+<section class="slide" data-sec="02C · Sumatorias">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 22 · Subloque C</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla P.G.</span>Pregunta 19 · p. 50</div>
+    <p class="problem">Un cable metálico de 75 m se corta en 4 pedazos. Cada pedazo tiene el doble de longitud que el anterior (<span class="math">x, 2x, 4x, 8x</span>). La <b>longitud del pedazo mayor</b> es:</p>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="B">
+     <button class="opt" data-k="A"><b>A</b>35</button>
+     <button class="opt" data-k="B"><b>B</b>40</button>
+     <button class="opt" data-k="C"><b>C</b>45</button>
+     <button class="opt" data-k="D"><b>D</b>50</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Plantea la ecuación:</b> <span class="math">x + 2x + 4x + 8x = 75 → 15x = 75</span>.</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Despeja x:</b> <span class="math">x = 5</span> metros.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Calcula el mayor (8x):</b> <span class="math">8 × 5 = 40</span> metros. <span class="ok">Respuesta B</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 22</h4>Partición en progresión geométrica simple.</aside>
+</section>
+
+<!-- ================= 31. SUBLOQUE C: EJERCICIO 23 ================= -->
+<section class="slide" data-sec="02C · Recurrencia">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 23 · Subloque C</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla Fibonacci</span>Preguntas 19 y 20 · p. 48</div>
+    <p class="problem">Las abejas machos nacen de huevos no fecundados (solo madre). Las hembras nacen de huevos fecundados (madre y padre). El <b>número de antepasados de la 1.ª generación</b> de una abeja macho de la 10.ª generación es:</p>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="D">
+     <button class="opt" data-k="A"><b>A</b>20</button>
+     <button class="opt" data-k="B"><b>B</b>30</button>
+     <button class="opt" data-k="C"><b>C</b>34</button>
+     <button class="opt" data-k="D"><b>D</b>55</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Genealogía de abejas:</b> El número de ancestros por generación sigue la <b>serie de Fibonacci</b>: <span class="math">1, 1, 2, 3, 5, 8, 13, 21, 34, 55…</span></p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Evalúa la posición 10:</b> <span class="math">F<sub>10</sub> = 55</span>.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Resultado:</b> Tiene un total de <b>55 antepasados</b> en la primera generación. <span class="ok">Respuesta D</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 23</h4>Aplicación clásica de Fibonacci en genealogía de abejas.</aside>
+</section>
+
+<!-- ================= 32. SUBLOQUE C: EJERCICIO 24 ================= -->
+<section class="slide" data-sec="02C · Sumatorias">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 24 · Subloque C</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla Taller 5</span>Tema 3 · Pregunta 8 · p. 46</div>
+    <p class="problem">Dado n, se define un número como la suma de los primeros n números pares positivos (<span class="math">x<sub>1</sub>=2, x<sub>2</sub>=2+4=6, x<sub>3</sub>=2+4+6=12…</span>). El número en la <b>posición 15 de la secuencia (2, 6, 12, 20, 30…)</b> es:</p>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="C">
+     <button class="opt" data-k="A"><b>A</b>200</button>
+     <button class="opt" data-k="B"><b>B</b>220</button>
+     <button class="opt" data-k="C"><b>C</b>240</button>
+     <button class="opt" data-k="D"><b>D</b>330</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Modela la secuencia:</b> <span class="math">x<sub>n</sub> = n(n + 1)</span>.</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Evalúa en n = 15:</b> <span class="math">x<sub>15</sub> = 15 × 16 = 240</span>.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Conclusión:</b> El número en la posición 15 es <b>240</b>. <span class="ok">Respuesta C</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 24</h4>Suma de los n primeros pares es n(n+1).</aside>
+</section>
+
+<!-- ================= 33. SUBLOQUE C: EJERCICIO 25 ================= -->
+<section class="slide" data-sec="02C · Sumatorias">
+ <div class="pill"><svg><use href="#star"/></svg>Ejercicio 25 · Subloque C</div>
+ <div class="inner">
+  <div class="row" style="gap:22px;align-items:flex-start">
+   <div class="card tape" style="flex:1.25">
+    <div class="src"><span class="tag real">Cartilla P.A.</span>Pregunta 9 · p. 49</div>
+    <p class="problem">La suma de 5 enteros consecutivos es 260. El <b>menor de ellos</b> es:</p>
+   </div>
+   <div class="col" style="flex:1;gap:12px">
+    <div class="timer" data-mode="up"><span class="lbl">Tiempo</span><span class="t">00:00</span><button class="btn" data-act="toggle">Iniciar</button><button class="btn ghost" data-act="reset" aria-label="Reiniciar">↺</button></div>
+    <div class="opts" data-ans="B">
+     <button class="opt" data-k="A"><b>A</b>45</button>
+     <button class="opt" data-k="B"><b>B</b>50</button>
+     <button class="opt" data-k="C"><b>C</b>52</button>
+     <button class="opt" data-k="D"><b>D</b>55</button>
+    </div>
+    <button class="btn yellow reveal-ans" style="align-self:flex-start">Mostrar respuesta</button>
+   </div>
+  </div>
+  <div class="col" style="margin-top:10px;gap:6px">
+   <p class="note step" style="margin:0;font-size:18px"><b>1. Halla el promedio (término central):</b> <span class="math">260 ÷ 5 = 52</span> (es el 3.er número).</p>
+   <p class="note step" style="margin:0;font-size:18px"><b>2. Resta 2 unidades para llegar al menor:</b> Los 5 números son <span class="math">50, 51, 52, 53, 54</span>.</p>
+   <p class="note ok step" style="margin:0;font-size:18px"><b>3. Resultado:</b> El menor entero es <b>50</b>. <span class="ok">Respuesta B</span></p>
+   <button class="btn pink stepbtn" style="align-self:flex-start">Siguiente paso</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Ejercicio 25</h4>Promedio de enteros consecutivos coincide con la mediana.</aside>
+</section>
+
+<!-- ================= 34. BLOQUE 3 DIVISOR ================= -->
+<section class="slide" data-sec="03 · Cierre">
+ <span class="num" style="right:120px;top:60px;font-size:140px;--r:10deg;--c:var(--pink)">3</span>
+ <div class="pill"><svg><use href="#star"/></svg>Bloque 3</div>
+ <div style="position:absolute;left:220px;top:200px;display:flex;gap:44px;align-items:center">
+  <div class="secnum pop">03</div>
+  <div style="max-width:760px">
+    <h2 class="h-hero" style="font-size:62px">Cierre y Asignación de Taller</h2>
+    <p class="lead" style="font-size:25px;margin-top:10px">Autoevaluación metacognitiva y plan de trabajo autónomo</p>
+  </div>
+ </div>
+ <aside class="notes"><h4>Bloque 3</h4>Consolidación de lo aprendido y asignación del taller autónomo.</aside>
+</section>
+
+<!-- ================= 35. METACOGNICIÓN ================= -->
+<section class="slide" data-sec="03 · Cierre">
+ <div class="pill"><svg><use href="#star"/></svg>Autoevaluación</div>
+ <div class="inner">
+  <h2 class="h-title">Metacognición: ¿Qué dominas y qué repasas?</h2>
+  <p class="small" style="margin:4px 0 12px">Haz clic en cada estrategia: 1 vez = lo domino ✓, 2 veces = lo repaso ↺.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+   <button class="mi"><i>1</i>Sucesiones Aritméticas: hallar el término general d · n + c en 5 segundos.</button>
+   <button class="mi"><i>2</i>Sucesiones Cíclicas: usar el residuo de N ÷ T para hallar términos lejanos.</button>
+   <button class="mi"><i>3</i>Estrategia Empaquetar: agrupar periodos con suma cero o constante.</button>
+   <button class="mi"><i>4</i>Estrategia Particularizar: probar para n = 1, 2, 3 y deducir la regla.</button>
+   <button class="mi"><i>5</i>Análisis Telescópico: usar números triangulares n(n + 1) / 2.</button>
+   <button class="mi"><i>6</i>Tablas y Matrices: hallar promedios y diferencias constantes en P.A.</button>
+  </div>
+ </div>
+ <aside class="notes"><h4>Metacognición</h4>Las tarjetas marcadas en rojo servirán de foco para el taller.</aside>
+</section>
+
+<!-- ================= 36. TALLER AUTÓNOMO ================= -->
+<section class="slide" data-sec="03 · Taller">
+ <div class="pill"><svg><use href="#star"/></svg>Tarea autónoma</div>
+ <div class="inner">
+  <h2 class="h-title">Taller para la casa · Sucesiones y Patrones</h2>
+  <p class="small" style="margin:4px 0 10px">Resuelve estos ejercicios del módulo antes de la próxima sesión (meta: 60 s por ejercicio).</p>
+  <table class="t" style="font-size:16px">
+   <tr><th>#</th><th>Ejercicio</th><th>Fuente</th><th>Estrategia sugerida</th></tr>
+   <tr><td>1</td><td>Palitos en hexágonos (8 niveles)</td><td>Cartilla P.A. · P11 · p. 50</td><td>Triangulares / Empaquetar</td></tr>
+   <tr><td>2</td><td>Escultor con barra de metal (10 trozos)</td><td>Cartilla P.A. · P12 · p. 50</td><td>Fórmula P.A. (S<sub>n</sub> = 100)</td></tr>
+   <tr><td>3</td><td>Secuencia de cuadrados (Pieza 100)</td><td>Cartilla P.A. · P13-14 · p. 50</td><td>Particularizar n = 1, 2, 3</td></tr>
+   <tr><td>4</td><td>Mensaje del chiste (40 estudiantes)</td><td>Cartilla P.G. · P20 · p. 50</td><td>Progresión Geométrica × 3</td></tr>
+   <tr><td>5</td><td>Árbol genealógico de abejas machos</td><td>Cartilla Fibonacci · P19-20 · p. 48</td><td>Sucesión de Fibonacci</td></tr>
+  </table>
+  <div class="notebox ok" style="margin-top:12px;font-size:18px">Compromiso: 5 ejercicios diarios con cronómetro. ¡Mañana arrancamos con 10 minutos de feedback!</div>
+ </div>
+ <aside class="notes"><h4>Taller</h4>Explica brevemente la fuente de cada ejercicio del taller.</aside>
+</section>
+
+<!-- ================= 37. CIERRE ================= -->
+<section class="slide" data-sec="03 · Cierre">
+ <svg class="deco" style="left:30px;top:20px;width:58px;height:190px;transform:rotate(-58deg)"><use href="#pencil"/></svg>
+ <span class="num" style="left:96px;bottom:20px;font-size:130px;--c:var(--yellow)">100</span>
+ <div style="position:absolute;left:150px;top:170px;right:150px">
+  <h1 class="h-hero pop" style="font-size:84px">¡Excelente trabajo, Carol!</h1>
+  <p class="lead" style="margin-top:24px;font-size:28px">Hoy aprendiste a dominar los patrones lejanos sin hacer cuentas largas.</p>
+  <p class="small" style="margin-top:14px;font-size:20px">Nos vemos en la próxima sesión. ¡Sigue aplicando el Método M.A.E.!</p>
+ </div>
+ <aside class="notes"><h4>Cierre</h4>Despídete con entusiasmo. Recuerda enviarle los apuntes de la sesión.</aside>
+</section>
+
+</div></div></div>
+
+<div id="bar">
+ <button class="navb" id="prev" aria-label="Anterior">‹ <span class="lab">Anterior</span></button>
+ <span id="count">1 / 1</span>
+ <button class="navb" id="next" aria-label="Siguiente"><span class="lab">Siguiente</span> ›</button>
+ <span id="sect"></span>
+ <div id="prog"><i></i></div>
+ <button class="navb" id="notesBtn" title="Notas del tutor (N)">Notas</button>
+ <button class="navb" id="fsBtn" title="Pantalla completa (F)">⛶</button>
+</div>
+<div id="notes" role="region" aria-label="Notas del presentador"></div>
+
+<script>
+(function(){
+ const slides=[...document.querySelectorAll('.slide')];
+ const frame=document.getElementById('frame');
+ const count=document.getElementById('count'), sect=document.getElementById('sect'), prog=document.querySelector('#prog i');
+ const notes=document.getElementById('notes'), notesBtn=document.getElementById('notesBtn');
+ let cur=0;
+
+ function fit(){
+  const bar=document.getElementById('bar').offsetHeight;
+  const cs=getComputedStyle(document.documentElement);
+  const pt=parseFloat(cs.paddingTop)||0, pb=parseFloat(cs.paddingBottom)||0;
+  const w=window.innerWidth-16, h=window.innerHeight-bar-pt-pb-16;
+  const s=Math.max(.1,Math.min(w/1280,h/720));
+  document.documentElement.style.setProperty('--s',s);
+ }
+ window.addEventListener('resize',fit); fit();
+
+ function show(i){
+  cur=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,k)=>s.classList.toggle('active',k===cur));
+  count.textContent=(cur+1)+' / '+slides.length;
+  sect.textContent=slides[cur].dataset.sec||'';
+  prog.style.width=((cur+1)/slides.length*100)+'%';
+  const n=slides[cur].querySelector('aside.notes');
+  notes.innerHTML=n?n.innerHTML:'<h4>Sin notas</h4>';
+  try{history.replaceState(null,'','#'+(cur+1))}catch(e){}
+  try{localStorage.setItem('carol-s3-slide',cur)}catch(e){}
+ }
+ document.getElementById('prev').onclick=()=>show(cur-1);
+ document.getElementById('next').onclick=()=>show(cur+1);
+ notesBtn.onclick=()=>{notes.classList.toggle('show');notesBtn.classList.toggle('on')};
+ document.getElementById('fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+
+ function nextStep(slide){
+  const st=[...slide.querySelectorAll('.step:not(.on)')];
+  if(!st.length) return false;
+  st[0].classList.add('on');
+  if(st.length===1) slide.querySelectorAll('.stepbtn').forEach(b=>{b.textContent='✓ Listo';b.disabled=true});
+  return true;
+ }
+ document.querySelectorAll('.stepbtn').forEach(b=>b.addEventListener('click',()=>nextStep(b.closest('.slide'))));
+
+ document.querySelectorAll('.opts').forEach(g=>{
+  g.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',()=>{
+   if(o.dataset.k===g.dataset.ans){g.querySelectorAll('.opt').forEach(x=>x.classList.remove('wrong'));o.classList.add('correct')}
+   else{o.classList.remove('wrong');void o.offsetWidth;o.classList.add('wrong')}
+  }));
+ });
+ document.querySelectorAll('.reveal-ans').forEach(b=>b.addEventListener('click',()=>{
+  b.closest('.slide').querySelectorAll('.opts').forEach(g=>{const c=g.querySelector('.opt[data-k="'+g.dataset.ans+'"]');c&&c.classList.add('correct')});
+ }));
+
+ const fmt=s=>{s=Math.max(0,Math.round(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+ document.querySelectorAll('.timer').forEach(t=>{
+  const mode=t.dataset.mode, total=+t.dataset.sec||0, out=t.querySelector('.t'), btn=t.querySelector('[data-act=toggle]');
+  let el=0, run=false, start=0, id=null;
+  const render=()=>{out.textContent=fmt(mode==='down'?total-el:el);t.classList.toggle('danger',mode==='down'&&run&&total-el<=10)};
+  function stop(){run=false;clearInterval(id);btn.textContent=el>0?'Seguir':'Iniciar';render()}
+  function go(){if(mode==='down'&&el>=total)return;run=true;t.classList.remove('done');start=Date.now()-el*1000;btn.textContent='Detener';
+   id=setInterval(()=>{el=(Date.now()-start)/1000;if(mode==='down'&&el>=total){el=total;stop();t.classList.add('done');out.textContent='¡Tiempo!';btn.textContent='Iniciar';return}render()},200)}
+  btn.addEventListener('click',()=>run?stop():go());
+  t.querySelector('[data-act=reset]').addEventListener('click',()=>{clearInterval(id);run=false;el=0;t.classList.remove('done','danger');btn.textContent='Iniciar';render()});
+  render();
+ });
+
+ document.querySelectorAll('.mi').forEach(m=>m.addEventListener('click',()=>{
+  const i=m.querySelector('i'); if(!m.dataset.n) m.dataset.n=i.textContent;
+  if(m.classList.contains('ok')){m.classList.replace('ok','rep');i.textContent='↺'}
+  else if(m.classList.contains('rep')){m.classList.remove('rep');i.textContent=m.dataset.n}
+  else{m.classList.add('ok');i.textContent='✓'}
+ }));
+
+ document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();show(cur+1)}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();show(cur-1)}
+  else if(e.key===' '&&e.target.tagName!=='BUTTON'){e.preventDefault();if(!nextStep(slides[cur]))show(cur+1)}
+  else if(e.key==='n'||e.key==='N')notesBtn.click();
+  else if(e.key==='f'||e.key==='F')document.getElementById('fsBtn').click();
+  else if(e.key==='Home')show(0);else if(e.key==='End')show(slides.length-1);
+ });
+
+ let sx=null;frame.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
+ frame.addEventListener('touchend',e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>60)show(cur+(dx<0?1:-1));sx=null});
+
+ let start=parseInt((location.hash||'').slice(1),10)-1;
+ if(isNaN(start)){try{start=parseInt(localStorage.getItem('carol-s3-slide'),10)}catch(e){}}
+ show(isNaN(start)?0:start);
+})();
+</script>
+</body>
+</html>
